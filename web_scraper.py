@@ -72,10 +72,7 @@ def scrape_Japan()-> list:
     scrapes countries that dont require visa to enter japan
     """
     countries = []
-    data = get_webpages(
-        "https://www.visasjapan.com/visa-exemptions/")
-    import io
-
+    data = get_webpages("https://www.visasjapan.com/visa-exemptions/")
     data = data.body
     data = data.findAll(
         "ul")
