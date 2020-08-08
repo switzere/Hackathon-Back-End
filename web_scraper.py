@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import requests
-import re
 from bs4 import BeautifulSoup
 import json
-import pycurl
 from io import BytesIO
 
 def get_webpages(webpage) -> dict:
@@ -46,7 +44,7 @@ def scrape_canada() -> list:
         )
     data = data.body.find_all("ul")
     for line in data:
-        print(line)
+        #print(line)
         for l in line.findChildren("li"):
             if ctr == 3:
                 data2.append(l.text)
@@ -57,11 +55,31 @@ def scrape_canada() -> list:
             break
     return data2
 
+def scrape_EU() -> list:
+    """
+    scrapes the data from the worldtravelguide because the EU website doesn't allow bots
+    """
+
+    data = get_webpages("https://www.worldtravelguide.net/features/feature/travelling-to-europe-without-a-visa/")
+
+    li = data.find_all("ul")
+
+
+    eu_li = li[2].text + li[3].text + li[4].text + li[5].text
+
+
+    eu_li = eu_li.split("\n")
+    eu_li = list(filter(None, eu_li))
+
+    return eu_li
+
 
 def main():
 
     US_list = scrape_US()
-    print(US_list)
+    CA_list = scrape_canada()
+    EU_list = scrape_EU()
+    print(EU_list)
 
 
 
