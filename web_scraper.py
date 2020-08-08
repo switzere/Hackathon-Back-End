@@ -14,7 +14,7 @@ def get_webpages(webpage) -> dict:
 
 
 def main():
-    data = get_webpages("http://www.google.com")
+    data = get_webpages("google.com")
     print(data)
 
 if __name__ == "__main__":
