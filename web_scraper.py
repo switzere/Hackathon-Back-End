@@ -72,14 +72,9 @@ def scrape_EU() -> list:
     data = get_webpages("https://www.worldtravelguide.net/features/feature/travelling-to-europe-without-a-visa/")
 
     li = data.find_all("ul")
-
-
     eu_li = li[2].text + li[3].text + li[4].text + li[5].text
-
-
     eu_li = eu_li.split("\n")
     eu_li = list(filter(None, eu_li))
-
     return eu_li
 
 
@@ -114,7 +109,7 @@ def main():
     CA_list = scrape_Canada()
     RU_list = scrape_Russia()
     JP_list = scrape_Japan()
-    """
+    EU_list = scrape_EU()
 
 if __name__ == "__main__":
     main()
