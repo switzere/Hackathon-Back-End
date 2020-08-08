@@ -33,22 +33,33 @@ def scrape_Canada() -> list:
     """
     ctr = 0
     data2 = []
+    countries = []
     found = False
     data = get_webpages(
-        "https://www.canada.ca/en/immigration-refugees-citizenship/services\
-        /visit-canada/entry-requirements-country.html#visaExempt"
+        "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/entry-requirements-country.html#visaExempt"
         )
     data = data.body.find_all("ul")
     for line in data:
         for l in line.findChildren("li"):
             if ctr == 3:
-                data2.append(l.text)
+                data2.append(l.text.split(",")[0])
                 found = True
             if ">eTA exemptions</a" in str(l):
                 ctr += 1
         if found is True:
             break
-    return data2
+    for line in data2:
+        if "British" in line and "United Kingdom" not in countries:
+            countries.append("United Kingdom")
+        elif "British" in line:
+            pass
+        elif "Hong Kong" in line:
+            countries.append("Hong Kong")
+        elif "Romania" in line:
+            countries.append(line.split(' ')[0])
+        else:
+            countries.append(line)
+    return countries
 
 
 def scrape_Russia() -> list:
@@ -59,8 +70,7 @@ def scrape_Russia() -> list:
     data = get_webpages(
         "https://www.visitrussia.org.uk/visas/getting-a-russian-visa/the-russian-federation-visa-free-regime/")
     data = data.body.find_all("ul")
-    data = data[2]
-    for child in data.findChildren("li"):
+    for child in data[2].findChildren("li"):
         for country in child.findChildren("p"):
             country = country.text.split(" ")[0].replace(".",'').replace("\n",'')
             country = country.split("\xa0")[0]
@@ -73,19 +83,15 @@ def scrape_Japan()-> list:
     """
     countries = []
     data = get_webpages("https://www.visasjapan.com/visa-exemptions/")
-    data = data.body
-    data = data.findAll(
-        "ul")
+    data = data.body.findAll("ul")
     for line in data[4].findChildren("li"):
         countries.append(line.text)
     return countries
 
 def main():
-    """
     US_list = scrape_US()
     CA_list = scrape_Canada()
     RU_list = scrape_Russia()
-    """
     JP_list = scrape_Japan()
 
 if __name__ == "__main__":
