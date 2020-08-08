@@ -15,6 +15,10 @@ def get_webpages(webpage) -> dict:
     return soup
 
 def scrape_US() -> list:
+    """
+    scrapes the data from the us travel website
+    """
+
     data = get_webpages("https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visa-waiver-program.html")
     us_li = []
     stripped_li = []
@@ -26,10 +30,6 @@ def scrape_US() -> list:
 
     for new_ul in us_li:
         stripped_li.append(new_ul.replace('*', ''))
-        #print(''.join(filter(str.isalnum, new_ul)))
-    #us_li = [re.sub("*","",x) for x in us_li]
-
-    print(stripped_li)
 
     return stripped_li
 
@@ -62,6 +62,8 @@ def main():
 
     US_list = scrape_US()
     print(US_list)
+
+
 
 
 if __name__ == "__main__":
