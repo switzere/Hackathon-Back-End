@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+from pymongo import MongoClient
 
 def get_webpages(webpage) -> dict:
     """
@@ -101,13 +102,32 @@ def scrape_Japan()-> list:
         countries.append(line.text)
     return countries
 
+def database(CA_list):
+
+    print(CA_list)
+
+    client = MongoClient('mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
+    db = client.get_database('Countries')
+    #collection = db.collection_name
+
+    for cursor in db.Canada.find():
+        print(cursor)
+        myquery = { "VisaFree": [] }
+        newvalues = { "$set": { "VisaFree": CA_list  } }
+
+        db.Canada.update_one(myquery, newvalues)
+
+    print(db.Canada.find())
+
 def main():
-    """
     US_list = scrape_US()
     CA_list = scrape_Canada()
+    """
     RU_list = scrape_Russia()
     JP_list = scrape_Japan()
     """
+
+    database(CA_list)
 
 if __name__ == "__main__":
     main()
