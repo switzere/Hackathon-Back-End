@@ -105,12 +105,36 @@ def scrape_Japan()-> list:
         countries.append(line.text)
     return countries
 
+def database(country_list, country):
+    data = []
+    cFind = []
+
+    client = MongoClient('mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
+    db = client.get_database('Countries')
+
+    for x in db[country].find():
+        if "VisaFree" in x:
+            cFind = x["VisaFree"]
+            break
+
+    myquery = { "VisaFree": cFind }
+    newvalues = { "$set": { "VisaFree": country_list  } }
+
+    db[country].update_one(myquery, newvalues)
+
+
 def main():
     US_list = scrape_US()
     CA_list = scrape_Canada()
     RU_list = scrape_Russia()
     JP_list = scrape_Japan()
     EU_list = scrape_EU()
+
+    database(US_list, "United States")
+    database(CA_list, "Canada")
+    database(RU_list, "Russia")
+    database(JP_list, "Japan")
+    database(EU_list, "European Union")
 
 if __name__ == "__main__":
     main()
