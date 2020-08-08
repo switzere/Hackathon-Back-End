@@ -3,8 +3,6 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import json
-import pycurl
-from io import BytesIO
 
 def get_webpages(webpage) -> dict:
     """
@@ -26,14 +24,10 @@ def scrape_US() -> list:
 
     for new_ul in us_li:
         stripped_li.append(new_ul.replace('*', ''))
-        #print(''.join(filter(str.isalnum, new_ul)))
-    #us_li = [re.sub("*","",x) for x in us_li]
-
-    print(stripped_li)
 
     return stripped_li
 
-def scrape_canada() -> list:
+def scrape_Canada() -> list:
     """
     scrapes the data froms the canadian immigration website
     """
@@ -58,10 +52,27 @@ def scrape_canada() -> list:
     return data2
 
 
+def scrape_Russia() -> list:
+    """
+    scrapes visa data from the eu website
+    """
+    countries = []
+    data = get_webpages(
+        "https://www.visitrussia.org.uk/visas/getting-a-russian-visa/the-russian-federation-visa-free-regime/")
+    data = data.body.find_all("ul")
+    data = data[2]
+    for child in data.findChildren("li"):
+        for country in child.findChildren("p"):
+            country = country.text.split(" ")[0].replace(".",'').replace("\n",'')
+            country = country.split("\xa0")[0]
+            countries.append(country)
+    return countries
+
 def main():
 
     US_list = scrape_US()
-    print(US_list)
+    CA_list = scrape_Canada()
+    RU_list = scrape_Russia()
 
 
 if __name__ == "__main__":
