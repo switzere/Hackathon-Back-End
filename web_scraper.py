@@ -2,7 +2,6 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-from io import BytesIO
 
 def get_webpages(webpage) -> dict:
     """
@@ -31,7 +30,7 @@ def scrape_US() -> list:
 
     return stripped_li
 
-def scrape_canada() -> list:
+def scrape_Canada() -> list:
     """
     scrapes the data froms the canadian immigration website
     """
@@ -44,7 +43,6 @@ def scrape_canada() -> list:
         )
     data = data.body.find_all("ul")
     for line in data:
-        #print(line)
         for l in line.findChildren("li"):
             if ctr == 3:
                 data2.append(l.text)
@@ -74,15 +72,42 @@ def scrape_EU() -> list:
     return eu_li
 
 
+def scrape_Russia() -> list:
+    """
+    scrapes visa data from the eu website
+    """
+    countries = []
+    data = get_webpages(
+        "https://www.visitrussia.org.uk/visas/getting-a-russian-visa/the-russian-federation-visa-free-regime/")
+    data = data.body.find_all("ul")
+    data = data[2]
+    for child in data.findChildren("li"):
+        for country in child.findChildren("p"):
+            country = country.text.split(" ")[0].replace(".",'').replace("\n",'')
+            country = country.split("\xa0")[0]
+            countries.append(country)
+    return countries
+
+def scrape_Japan()-> list:
+    """
+    scrapes countries that dont require visa to enter japan
+    """
+    countries = []
+    data = get_webpages("https://www.visasjapan.com/visa-exemptions/")
+    data = data.body
+    data = data.findAll(
+        "ul")
+    for line in data[4].findChildren("li"):
+        countries.append(line.text)
+    return countries
+
 def main():
-
+    """
     US_list = scrape_US()
-    CA_list = scrape_canada()
-    EU_list = scrape_EU()
-    print(EU_list)
-
-
-
+    CA_list = scrape_Canada()
+    RU_list = scrape_Russia()
+    JP_list = scrape_Japan()
+    """
 
 if __name__ == "__main__":
     main()
