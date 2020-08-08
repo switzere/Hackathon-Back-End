@@ -40,7 +40,6 @@ def scrape_Canada() -> list:
         )
     data = data.body.find_all("ul")
     for line in data:
-        print(line)
         for l in line.findChildren("li"):
             if ctr == 3:
                 data2.append(l.text)
@@ -68,12 +67,29 @@ def scrape_Russia() -> list:
             countries.append(country)
     return countries
 
-def main():
+def scrape_Japan()-> list:
+    """
+    scrapes countries that dont require visa to enter japan
+    """
+    countries = []
+    data = get_webpages(
+        "https://www.visasjapan.com/visa-exemptions/")
+    import io
 
+    data = data.body
+    data = data.findAll(
+        "ul")
+    for line in data[4].findChildren("li"):
+        countries.append(line.text)
+    return countries
+
+def main():
+    """
     US_list = scrape_US()
     CA_list = scrape_Canada()
     RU_list = scrape_Russia()
-
+    """
+    JP_list = scrape_Japan()
 
 if __name__ == "__main__":
     main()
