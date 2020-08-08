@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+from pymongo import MongoClient
 
 def get_webpages(webpage) -> dict:
     """
