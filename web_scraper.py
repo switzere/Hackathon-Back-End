@@ -123,10 +123,8 @@ def getEUCountries():
 
     for line in data:
         countries.append(line.text)
-        print(line.text)
 
     countries.pop()
-    print(countries)
 
     client = MongoClient('mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
     db = client.get_database('Countries')
