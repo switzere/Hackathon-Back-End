@@ -105,6 +105,41 @@ def scrape_Japan()-> list:
         countries.append(line.text)
     return countries
 
+
+
+def getEUCountries():
+    """
+    Get a list of European Union countries and add them to the database
+    """
+    countries = []
+
+    data = get_webpages("https://europa.eu/european-union/about-eu/countries_en")
+
+    data = data.body.find(id="year-entry2")
+    data = data.findAll("td")
+
+    for line in data:
+        countries.append(line.text)
+        print(line.text)
+
+    countries.pop()
+    print(countries)
+
+    client = MongoClient('mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
+    db = client.get_database('Countries')
+
+    for x in db["List of EU Countries"].find():
+        if "Countries" in x:
+            cFind = x["Countries"]
+            break
+
+    myquery = { "Countries": cFind }
+    newvalues = { "$set": { "Countries": countries  } }
+
+    db["List of EU Countries"].update_one(myquery, newvalues)
+
+
+
 def database(country_list, country):
     data = []
     cFind = []
@@ -129,6 +164,8 @@ def main():
     RU_list = scrape_Russia()
     JP_list = scrape_Japan()
     EU_list = scrape_EU()
+
+    getEUCountries()
 
     database(US_list, "United States")
     database(CA_list, "Canada")
