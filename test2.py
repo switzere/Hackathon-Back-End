@@ -185,6 +185,7 @@ def getEUCountries() -> None:
     Get a list of European Union countries and add them to the database
     """
     countries = []
+
     cFind = []
     data = get_webpages("https://europa.eu/european-union/about-eu/countries_en")
 

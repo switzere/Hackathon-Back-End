@@ -101,19 +101,6 @@ def get_currency(input_country) -> str:
     file = open("country_conversion.json", "r")
     data = json.load(file)
     file.close()
-    input_country = input_country.replace(" ", '')
-    if "UnitedStates" in input_country:
-        input_country = "UnitedStates"
-    elif "TheRepublicofSouthAfrica" in input_country or "RepublicofKorea" in input_country:
-        input_country = "SouthKorea"
-    elif "KirghizRepublic" in input_country:
-        input_country = "Kyrgyzstan"
-    elif "BruneiDarussalam" in input_country:
-        input_country = "Brunei"
-    elif "PitcairnIsland" in input_country:
-        input_country = "Pitcairn"
-    elif "Columbia" in input_country:
-        input_country = "Colombia"
     for cntry in data:
         if cntry['Country'] == input_country:
             input_country = cntry['Code']
@@ -138,23 +125,48 @@ def currency_Exchange(country, visa_list) -> list:
     return final_list
 
 
-def main():
-    countries = []
-    f = open("country_conversion.json", "r")
-    data = json.load(f)
-    for line in data:
-        countries.append(line['Country'])
+def sorting(countries_visa, country_list, country) -> dict:
+    """
+    sorts data for input into database
+    change lists from incoming visa free to outgoing visa free
+    """
+    for data in countries_visa:
+        if data in country_list:
+            countries_visa[data].append(country)
+    return countries_visa
+
+def get_data(countries, countries_visa, data) -> dict:
+    """
+    helper function that gets all the data
+    """
     for country in countries:
         country_list = scrape_wiki(country)
-
         if country_list:
             for line in data:
                 if country in line:
                     country_list = currency_Exchange(line['Code'], country_list)
                     break
-            #database(country_list, country)
+            countries_visa = sorting(countries_visa, country_list, country)
+    return countries_visa
+
+def main():
+    countries = []
+    countries_visa = {}
+    f = open("country_conversion.json", "r")
+    data = json.load(f)
+    f.close()
+    for line in data:
+        countries.append(line['Country'])
+        countries_visa[line['Country']] = []
+
+    countries_visa = get_data(countries, countries_visa, data)
+    for country in countries_visa:
+        if countries_visa[country]:
+            database(countries_visa[country], country)
+
     getEUCountries()
     country_list = scrape_EU()
     database(country_list, "European Union")
+
 if __name__ == "__main__":
     main()

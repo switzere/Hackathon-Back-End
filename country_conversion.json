@@ -247,5 +247,6 @@
     {"Country":"Saint_Helena","CountryCode":"SH","Currency":"SaintHelenapound","Code":"GBP"},
     {"Country":"Saint_Martin","CountryCode":"MF","Currency":"NetherlandsAntilleanguilder","Code":"ANG"},
     {"Country":"Saint_Pierre_and_Miquelon","CountryCode":"PM","Currency":"Euro","Code":"EUR"},
-    {"Country":"Serbia","CountryCode":"RS","Currency":"Serbiandinar","Code":"RSD"}
+    {"Country":"Serbia","CountryCode":"RS","Currency":"Serbiandinar","Code":"RSD"},
+    {"Country":"European_Union","CountryCode":"EU","Currency":"Euro","Code":"EUR"}
 ]
