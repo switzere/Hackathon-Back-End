@@ -75,7 +75,7 @@
     {"Country":"Bahrain","CountryCode":"BH","Currency":"BahrainiDinar","Code":"BHD"},
     {"Country":"Bangladesh","CountryCode":"BD","Currency":"Taka","Code":"BDT"},
     {"Country":"Barbados","CountryCode":"BB","Currency":"BarbadianDollar","Code":"BBD"},
-    {"Country":"Belarus","CountryCodeBarbados":"BY","Currency":"BelarusRuble","Code":"BYR"},
+    {"Country":"Belarus","CountryCode":"BY","Currency":"BelarusRuble","Code":"BYR"},
     {"Country":"Belize","CountryCode":"BZ","Currency":"BelizeanDollar","Code":"BZD"},
     {"Country":"Benin","CountryCode":"BJ","Currency":"CFAFrancBCEAO","Code":"XOF"},
     {"Country":"Burkina_Faso","CountryCode":"BF","Currency":"CFAFrancBCEAO","Code":"XOF"},
@@ -247,6 +247,5 @@
     {"Country":"Saint_Helena","CountryCode":"SH","Currency":"SaintHelenapound","Code":"GBP"},
     {"Country":"Saint_Martin","CountryCode":"MF","Currency":"NetherlandsAntilleanguilder","Code":"ANG"},
     {"Country":"Saint_Pierre_and_Miquelon","CountryCode":"PM","Currency":"Euro","Code":"EUR"},
-    {"Country":"Serbia","CountryCode":"RS","Currency":"Serbiandinar","Code":"RSD"},
-    {"Country":"European_Union","CountryCode":"EU","Currency":"Euro","Code":"EUR"}
+    {"Country":"Serbia","CountryCode":"RS","Currency":"Serbiandinar","Code":"RSD"}
 ]

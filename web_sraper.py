@@ -34,18 +34,21 @@ def scrape_EU() -> list:
     """
 
     data = get_webpages("https://www.worldtravelguide.net/features/feature/travelling-to-europe-without-a-visa/")
-
+    list2 = []
     li = data.find_all("ul")
     eu_li = li[2].text + li[3].text + li[4].text + li[5].text
     eu_li = eu_li.split("\n")
     eu_li = list(filter(None, eu_li))
-    return eu_li
+    for element in eu_li:
+        list2.append({"country": element})
+    return list2
 
 def getEUCountries() -> None:
     """
     Get a list of European Union countries and add them to the database
     """
     countries = []
+    countries2 = []
     cFind = []
     data = get_webpages(
         "https://europa.eu/european-union/about-eu/countries_en")
@@ -57,7 +60,8 @@ def getEUCountries() -> None:
         countries.append(line.text)
 
     countries.pop()
-
+    for line in countries:
+        countries2.append({"country": line})
     client = MongoClient(
         'mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
     db = client.get_database('Countries')
@@ -68,7 +72,7 @@ def getEUCountries() -> None:
             break
 
     myquery = {"Countries": cFind}
-    newvalues = {"$set": {"Countries": countries}}
+    newvalues = {"$set": {"Countries": countries2}}
 
     db["List of EU Countries"].update_one(myquery, newvalues)
 
@@ -132,7 +136,7 @@ def sorting(countries_visa, country_list, country) -> dict:
     """
     for data in countries_visa:
         if data in country_list:
-            countries_visa[data].append(country)
+            countries_visa[data].append({"country": country})
     return countries_visa
 
 def get_data(countries, countries_visa, data) -> dict:
@@ -142,10 +146,6 @@ def get_data(countries, countries_visa, data) -> dict:
     for country in countries:
         country_list = scrape_wiki(country)
         if country_list:
-            for line in data:
-                if country in line:
-                    country_list = currency_Exchange(line['Code'], country_list)
-                    break
             countries_visa = sorting(countries_visa, country_list, country)
     return countries_visa
 
@@ -166,7 +166,7 @@ def main():
 
     getEUCountries()
     country_list = scrape_EU()
-    database(country_list, "European Union")
+    database(country_list, "European_Union")
 
 if __name__ == "__main__":
     main()
