@@ -190,14 +190,9 @@ def currency_Exchange(country, visa_list) -> list:
     c = CurrencyRates()
     for visa in visa_list:
         symbol = get_currency(visa)
-        if symbol:
-            try:
-                rate = c.get_rate(country,symbol)
-            except Exception:
-                print(symbol)
-                print(visa)
-                rate = "??"
-        else:
+        try:
+            rate = c.get_rate(country,symbol)
+        except Exception:
             rate = "??"
         final_list.append([visa, str(rate)])
     return final_list
