@@ -107,8 +107,56 @@ def scrape_Japan()-> list:
     return countries
 
 
+def scrape_Peru() -> list:
+    """
+    scrapes the data for peru
+    """
+    countries = []
+    data = get_webpages("https://visaguide.world/south-america/peru-visa/")
+    data = data.body.findAll("ul")
+    for line in data[8].findChildren("li"):
+        countries.append(line.text.split(" (")[0].replace("*",''))
+    return countries
 
-def getEUCountries():
+
+def scrape_Korea() -> list:
+    """
+    scrapes the data for mexico
+    """
+    countries = []
+    data = get_webpages("http://overseas.mofa.go.kr/ca-vancouver-en/brd/m_4542/view.do?seq=615041&srchFr=&srchTo=&srchWord=&srchTp=")
+    data = data.body.findAll("table")
+    for line in data[1].findChildren("tbody")[0].findChildren("tr"):
+        ctr = 0
+        for part in line.findChildren("td"):
+            if ctr % 2 == 1:
+                for thing in part.findChildren("p"):
+                    if thing.text != "Countries":
+                        thing = thing.text.split(", ")
+                        for item in thing:
+                            item = item.replace("\xa0", " ").split(" (")[0].split(" [")[0].split("(")[0].replace("-", " and ")
+                            countries.append(item)
+            ctr += 1
+    return countries
+
+def scrape_Mexico() -> list:
+    countries = []
+    ctr = 0
+    data = get_webpages("https://www.visatraveler.com/visa-guides/mexico-visa-requirements/")
+    data = data.body.findAll("div", {"class": "one-third"})
+    for third in data:
+        for line in str(third).split("<br/>"):
+            if '<div class="one-third first">' in line:
+                ctr += 1
+            if ctr == 2:
+                return countries
+            line = line.replace("</div>","").replace("<div>","")
+            if  ">" in line:
+                line = line.split(">")[1].replace("</a","").strip()
+            countries.append(line.strip())
+    return countries
+
+def getEUCountries() -> None:
     """
     Get a list of European Union countries and add them to the database
     """
@@ -139,7 +187,7 @@ def getEUCountries():
 
 
 
-def database(country_list, country):
+def database(country_list, country) -> None:
     cFind = []
 
     client = MongoClient('mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
@@ -208,15 +256,20 @@ def main():
     JP_list = currency_Exchange("JPY", JP_list)
     EU_list = scrape_EU()
     EU_list = currency_Exchange("EUR", EU_list)
-
+    PE_list = scrape_Peru()
+    PE_list = currency_Exchange("SOL", PE_list)
+    KR_list = scrape_Korea()
+    KR_list = currency_Exchange("KRW", KR_list)
+    MX_list = scrape_Mexico()
+    MX_list = currency_Exchange("MXN", MX_list)
     getEUCountries()
-
     database(US_list, "United States")
     database(CA_list, "Canada")
     database(RU_list, "Russia")
     database(JP_list, "Japan")
     database(EU_list, "European Union")
-
-
+    database(PE_list, "Peru")
+    database(KR_list, "South Korea")
+    database(MX_list, "Mexico")
 if __name__ == "__main__":
     main()
