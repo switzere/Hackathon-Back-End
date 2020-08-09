@@ -3,6 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import json
 from pymongo import MongoClient
+from forex_python.converter import CurrencyRates
+import pycountry
+
 
 def get_webpages(webpage) -> dict:
     """
@@ -141,7 +144,6 @@ def getEUCountries():
 
 
 def database(country_list, country):
-    data = []
     cFind = []
 
     client = MongoClient('mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
@@ -158,12 +160,52 @@ def database(country_list, country):
     db[country].update_one(myquery, newvalues)
 
 
+def get_currency(input_country) -> str:
+    """
+    converts country to currency code
+    """
+    countries = {}
+    for country in pycountry.countries:
+        countries[country.name] = country.alpha_2
+    code = countries.get(input_country)
+    file = open("country_conversion.json", "r")
+    data = json.load(file) 
+    file.close()
+    for cntry in data:
+        if cntry['CountryCode'] == code:
+            code = cntry['Code']
+            break
+    return code
+
+def currency_Exchange(country, visa_list) -> list:
+    """
+    Pulls the currency data
+    """
+    final_list = []
+    c = CurrencyRates()
+    for visa in visa_list:
+        symbol = get_currency(visa)
+        if symbol:
+            try:
+                rate = c.get_rate(country,symbol)
+            except Exception:
+                rate = "??"
+        else:
+            rate = "??"
+        final_list.append([visa, str(rate)])
+    return final_list
+
 def main():
     US_list = scrape_US()
+    US_list = currency_Exchange("USD", US_list)
     CA_list = scrape_Canada()
+    CA_list = currency_Exchange("CAD", CA_list)
     RU_list = scrape_Russia()
+    RU_list = currency_Exchange("RUB", RU_list)
     JP_list = scrape_Japan()
+    JP_list = currency_Exchange("JPY", JP_list)
     EU_list = scrape_EU()
+    EU_list = currency_Exchange("EUR", EU_list)
 
     getEUCountries()
 
