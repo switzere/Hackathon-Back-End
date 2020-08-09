@@ -4,8 +4,6 @@ from bs4 import BeautifulSoup
 import json
 from pymongo import MongoClient
 from forex_python.converter import CurrencyRates
-import pycountry
-
 
 def get_webpages(webpage) -> dict:
     """
@@ -92,7 +90,7 @@ def scrape_Russia() -> list:
     data = data.body.find_all("ul")
     for child in data[2].findChildren("li"):
         for country in child.findChildren("p"):
-            country = country.text.split(" ")[0].replace(".",'').replace("\n",'')
+            country = country.text.split(" (")[0].split(".")[0].replace("\n",'')
             country = country.split("\xa0")[0]
             countries.append(country)
     return countries
@@ -162,18 +160,27 @@ def get_currency(input_country) -> str:
     """
     converts country to currency code
     """
-    countries = {}
-    for country in pycountry.countries:
-        countries[country.name] = country.alpha_2
-    code = countries.get(input_country)
     file = open("country_conversion.json", "r")
     data = json.load(file) 
     file.close()
+    input_country = input_country.replace(" ",'')
+    if "UnitedStates" in input_country:
+        input_country = "UnitedStates"
+    elif "TheRepublicofSouthAfrica" in input_country or "RepublicofKorea" in input_country:
+        input_country = "SouthKorea"
+    elif "KirghizRepublic" in input_country:
+        input_country = "Kyrgyzstan"
+    elif "BruneiDarussalam" in input_country:
+        input_country = "Brunei"
+    elif "PitcairnIsland" in input_country:
+        input_country = "Pitcairn"
+    elif "Columbia" in input_country:
+        input_country = "Colombia"
     for cntry in data:
-        if cntry['CountryCode'] == code:
-            code = cntry['Code']
+        if cntry['Country'] == input_country:
+            input_country = cntry['Code']
             break
-    return code
+    return input_country
 
 def currency_Exchange(country, visa_list) -> list:
     """
@@ -187,6 +194,8 @@ def currency_Exchange(country, visa_list) -> list:
             try:
                 rate = c.get_rate(country,symbol)
             except Exception:
+                print(symbol)
+                print(visa)
                 rate = "??"
         else:
             rate = "??"
@@ -212,6 +221,7 @@ def main():
     database(RU_list, "Russia")
     database(JP_list, "Japan")
     database(EU_list, "European Union")
+
 
 if __name__ == "__main__":
     main()
