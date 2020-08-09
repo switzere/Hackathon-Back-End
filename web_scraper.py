@@ -125,18 +125,15 @@ def scrape_Korea() -> list:
     """
     countries = []
     data = get_webpages("http://overseas.mofa.go.kr/ca-vancouver-en/brd/m_4542/view.do?seq=615041&srchFr=&srchTo=&srchWord=&srchTp=")
-    data = data.body.findAll("table")
-    for line in data[1].findChildren("tbody")[0].findChildren("tr"):
-        ctr = 0
-        for part in line.findChildren("td"):
-            if ctr % 2 == 1:
-                for thing in part.findChildren("p"):
-                    if thing.text != "Countries":
-                        thing = thing.text.split(", ")
-                        for item in thing:
-                            item = item.replace("\xa0", " ").split(" (")[0].split(" [")[0].split("(")[0].replace("-", " and ")
-                            countries.append(item)
-            ctr += 1
+    data = data.body.findAll("table")[1]
+    data = data.findAll("p")
+    for line in data:
+        line = line.text
+        if "," in line:
+            line = line.split(",")
+            for item in line:
+                item = item.split("(")[0].split("[")[0]
+                countries.append(item.strip())
     return countries
 
 def scrape_Mexico() -> list:
@@ -156,12 +153,39 @@ def scrape_Mexico() -> list:
             countries.append(line.strip())
     return countries
 
+def scrape_wiki(url) -> list:
+    countries = []
+    data = get_webpages(url)
+    data = data.body.findAll("table")[1]
+    data = data.findAll("li")
+    for line in data:
+        countries.append(line.find("a").text)
+    return countries
+
+def scrape_South_Africa() -> list:
+    """
+    Scrape data for south africa
+    """
+    countries = []
+    data = get_webpages("http://www.dha.gov.za/index.php/immigration-services/exempt-countries")
+    data = data.body.findAll("table")[0]
+    data = data.findAll("tr")
+    for line in data:
+        line = line.find("td").text
+        if line != "Diplomatic" and "Visa" not in line and line != "COUNTRY NAME/ORGANISATIONS":
+            if "United Kingdom of Great Britain and Northern Ireland" in line:
+                line = "United Kingdom"
+            elif "Russian Federation" in line:
+                line = "Russia"
+            countries.append(line.split("(")[0].split(",")[0].replace("*",''))
+    return countries
+
 def getEUCountries() -> None:
     """
     Get a list of European Union countries and add them to the database
     """
     countries = []
-
+    cFind = []
     data = get_webpages("https://europa.eu/european-union/about-eu/countries_en")
 
     data = data.body.find(id="year-entry2")
@@ -189,19 +213,22 @@ def getEUCountries() -> None:
 
 def database(country_list, country) -> None:
     cFind = []
-
-    client = MongoClient('mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
+    client = MongoClient(
+        'mongodb+srv://atlasAdmin:atlasPassword@lightningmcqueen.uc4fr.mongodb.net/LightningMcqueen?retryWrites=true&w=majority', 27017)
     db = client.get_database('Countries')
+    if country in db.list_collection_names():
+        for x in db[country].find():
+            if "VisaFree" in x:
+                cFind = x["VisaFree"]
+                break
 
-    for x in db[country].find():
-        if "VisaFree" in x:
-            cFind = x["VisaFree"]
-            break
+        myquery = {"VisaFree": cFind}
+        newvalues = {"$set": {"VisaFree": country_list}}
 
-    myquery = { "VisaFree": cFind }
-    newvalues = { "$set": { "VisaFree": country_list  } }
-
-    db[country].update_one(myquery, newvalues)
+        db[country].update_one(myquery, newvalues)
+    else:
+        my_dict = {"Name": country, "VisaFree": country_list}
+        db[country].insert_one(my_dict)
 
 
 def get_currency(input_country) -> str:
@@ -245,31 +272,62 @@ def currency_Exchange(country, visa_list) -> list:
         final_list.append([visa, str(rate)])
     return final_list
 
+def scraper(country) ->list:
+    """
+    returns list from scraper
+    """
+    data = []
+    if country == "United States":
+        data = scrape_US()
+    elif country == "Canada":
+        data = scrape_Canada()
+    elif country == "Russia":
+        data = scrape_Russia()
+    elif country == "Japan":
+        data = scrape_Japan()
+    elif country == "European Union":
+        data = scrape_EU()
+    elif country == "Peru":
+        data = scrape_Peru()
+    elif country == "South Korea":
+        data =  scrape_Korea()
+    elif country == "Chad":
+        data = scrape_wiki("https://en.wikipedia.org/wiki/Visa_policy_of_Chad")
+    elif country == "South Africa":
+        data = scrape_South_Africa()
+    elif country == "Mexico":
+        data = scrape_Mexico()
+    elif country == "Brazil":
+        data = scrape_wiki("https://en.wikipedia.org/wiki/Visa_policy_of_Brazil")
+        data.append("European Union")
+    elif country == "Jamaica":
+        data = scrape_wiki("https://en.wikipedia.org/wiki/Visa_policy_of_Jamaica")
+    elif country == "Uzbekistan":
+        data = scrape_wiki("https://en.wikipedia.org/wiki/Visa_policy_of_Uzbekistan")
+    return data
+
+
 def main():
-    US_list = scrape_US()
-    US_list = currency_Exchange("USD", US_list)
-    CA_list = scrape_Canada()
-    CA_list = currency_Exchange("CAD", CA_list)
-    RU_list = scrape_Russia()
-    RU_list = currency_Exchange("RUB", RU_list)
-    JP_list = scrape_Japan()
-    JP_list = currency_Exchange("JPY", JP_list)
-    EU_list = scrape_EU()
-    EU_list = currency_Exchange("EUR", EU_list)
-    PE_list = scrape_Peru()
-    PE_list = currency_Exchange("SOL", PE_list)
-    KR_list = scrape_Korea()
-    KR_list = currency_Exchange("KRW", KR_list)
-    MX_list = scrape_Mexico()
-    MX_list = currency_Exchange("MXN", MX_list)
+    countries = {
+        "United States":"USD",
+        "Canada":"CAD",
+        "Russia":"RUB",
+        "Japan":"JPY",
+        "European Union":"EUR",
+        "Peru":"SOL",
+        "South Korea":"KRW",
+        "Chad": "XAF",
+        "South Africa": "ZAR",
+        "Mexico": "MXN",
+        "Brazil": "BRL",
+        "Jamaica": "JMD",
+        "Uzbekistan": "UZS"
+        }
+    for country in countries:
+        country_list = scraper(country)
+        country_list = currency_Exchange(countries[country], country_list)
+        database(country_list, country)
     getEUCountries()
-    database(US_list, "United States")
-    database(CA_list, "Canada")
-    database(RU_list, "Russia")
-    database(JP_list, "Japan")
-    database(EU_list, "European Union")
-    database(PE_list, "Peru")
-    database(KR_list, "South Korea")
-    database(MX_list, "Mexico")
+
 if __name__ == "__main__":
     main()
